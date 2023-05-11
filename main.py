@@ -12,6 +12,7 @@ from tkinter import filedialog
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 import speech_recognition as sr
+
 class main:
     def __init__(self,master):
         self.master=master
@@ -22,18 +23,19 @@ class main:
         self.lbl_text.set("waiting")
         master.title("Admin Home")
         master.state("zoomed")
-        large_font = ('Verdana', 25)
+        large_font = ('Verdana', 15)
 
-        lbl_2 = Label(master, text="Duration", height=2, width=20, font=large_font).place(x=700, y=10)
-        dur = Entry(master,textvariable=self.duration, width=3, font=large_font).place(x=1000, y=20)
-        sbmitbtn = Button(master, text="RECORD VOICE", height = 2, width = 20,font=large_font,command=self.recordvoice ).place(x=700, y=75)
-        lbl = Label(master, text="Select a Voice...", height=2, width=20, font=large_font).place(x=700, y=200)
-        voice_emotion = Label(master,textvariable=self.lbl_text, text="Emotion...", height=2, width=20, font=large_font).place(x=100, y=200)
-        txt = Entry(master,textvariable=self.fpath, width=20, font=large_font).place(x=700, y=300)
-        browse = Button(master, text="Browse",  font=large_font,command=self.browsefunc).place(x=1150, y=300)
-        emotion = Button(master, text="VIEW EMOTION", height=2, width=20, font=large_font,command=self.viewemotion).place(x=700, y=400)
-        ext = Button(master, text="Exit", height=2, width=20, font=large_font,command=master.destroy).place(x=700, y=550)
+        lbl_2 = Label(master, text="Duration in Seconds", height=2, width=20, font=large_font).place(x=10, y=10)
+        dur = Entry(master,textvariable=self.duration, width=3, font=large_font).place(x=400, y=20)
+        sbmitbtn = Button(master, text="RECORD VOICE", height=2, width=20, font=large_font, command=self.recordvoice).place(x=200, y=75)
+        lbl = Label(master, text="Select a Voice...", height=2, width=20, font=large_font).place(x=200, y=200)
+        voice_emotion = Label(master,textvariable=self.lbl_text, text="Emotion...", height=2, width=20, font=large_font).place(x=900, y=200)
+        txt = Entry(master,textvariable=self.fpath, width=20, font=large_font).place(x=200, y=300)
+        browse = Button(master, text="Browse", font=large_font, command=self.browsefunc).place(x=700, y=300)
+        emotion = Button(master, text="VIEW EMOTION", height=2, width=20, font=large_font, command=self.viewemotion).place(x=200, y=400)
+        ext = Button(master, text="Exit", height=2, width=20, font=large_font, command=master.destroy).place(x=200, y=550)
         master.mainloop()
+
     def recordvoice(self):
         print("record")
         tme = int(self.duration.get().strip())
