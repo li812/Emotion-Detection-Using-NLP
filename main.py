@@ -3,43 +3,85 @@
 #pip install pyaudio
 #pip install SpeechRecognition
 
-from tkinter import *
-from tkinter import messagebox
+import sys
 import sounddevice
 from scipy.io.wavfile import write
 import soundfile
-from tkinter import filedialog
+from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox
+from PyQt5.QtGui import QFont
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 import speech_recognition as sr
 
-class main:
-    def __init__(self,master):
-        self.master=master
-        self.duration=StringVar()
-        self.fpath=StringVar()
-        self.lbl_text=StringVar()
+class Main(QWidget):
+    def __init__(self):
+        super().__init__()
 
-        self.lbl_text.set("waiting")
-        master.title("Admin Home")
-        master.state("zoomed")
-        large_font = ('Verdana', 15)
+        self.duration = QLineEdit(self)
+        self.fpath = QLineEdit(self)
+        self.lbl_text = QLabel(self)
 
-        lbl_2 = Label(master, text="Duration in Seconds", height=2, width=20, font=large_font).place(x=10, y=10)
-        dur = Entry(master,textvariable=self.duration, width=3, font=large_font).place(x=400, y=20)
-        sbmitbtn = Button(master, text="RECORD VOICE", height=2, width=20, font=large_font, command=self.recordvoice).place(x=200, y=75)
-        lbl = Label(master, text="Select a Voice...", height=2, width=20, font=large_font).place(x=200, y=200)
-        voice_emotion = Label(master,textvariable=self.lbl_text, text="Emotion...", height=2, width=20, font=large_font).place(x=900, y=200)
-        txt = Entry(master,textvariable=self.fpath, width=20, font=large_font).place(x=200, y=300)
-        browse = Button(master, text="Browse", font=large_font, command=self.browsefunc).place(x=700, y=300)
-        emotion = Button(master, text="VIEW EMOTION", height=2, width=20, font=large_font, command=self.viewemotion).place(x=200, y=400)
-        ext = Button(master, text="Exit", height=2, width=20, font=large_font, command=master.destroy).place(x=200, y=550)
-        master.mainloop()
+
+        self.initUI()
+
+    def initUI(self):
+        self.setWindowTitle("Emotion-Detection-Using-NLP")
+        self.setGeometry(100, 100, 290, 525)
+        large_font = QFont('Verdana', 15)
+
+        lbl_2 = QLabel("Duration in Seconds   ", self)
+        lbl_2.move(20, 20)
+        lbl_2.resize(250, 50)
+
+        self.duration.move(150, 20)
+        self.duration.resize(50, 50)
+
+
+        txt = QLineEdit(self)
+        txt.move(150, 20)
+        txt.resize(50, 50)
+        txt.setText("")
+
+        sbmitbtn = QPushButton("RECORD VOICE", self)
+        sbmitbtn.move(20, 100)
+        sbmitbtn.resize(250, 50)
+        sbmitbtn.setFont(large_font)
+        sbmitbtn.clicked.connect(self.recordvoice)
+
+        lbl = QLabel("Select a Voice...", self)
+        lbl.move(20, 150)
+        lbl.resize(250, 50)
+
+       
+
+    
+        self.fpath.move(20, 200)
+        self.fpath.resize(250, 50)
+
+
+
+        browse = QPushButton("Browse", self)
+        browse.move(20, 250)
+        browse.resize(250, 50)
+        browse.setFont(large_font)
+        browse.clicked.connect(self.browsefunc)
+
+        emotion = QPushButton("VIEW EMOTION", self)
+        emotion.move(20, 350)
+        emotion.resize(250, 50)
+        emotion.setFont(large_font)
+        emotion.clicked.connect(self.viewemotion)
+
+        ext = QPushButton("Exit", self)
+        ext.move(20, 450)
+        ext.resize(250, 50)
+        ext.setFont(large_font)
+        ext.clicked.connect(self.close)
 
     def recordvoice(self):
         print("record")
-        tme = int(self.duration.get().strip())
-        print("Time:",tme)
+        tme = int(self.duration.text().strip())
+        print("Time:", tme)
         fs = 44100
         print("Recording.....n")
         record_voice = sounddevice.rec(int(tme * fs), samplerate=fs, channels=2)
@@ -48,18 +90,20 @@ class main:
         print("Finished.....nPlease check your ou1tput file")
         data, samplerate = soundfile.read('out.wav')
         soundfile.write('new.wav', data, samplerate, subtype='PCM_16')
-        messagebox.showinfo("Record", "Voice recording finished...")
+        QMessageBox.information(self, "Record", "Voice recording finished...")
+
     def browsefunc(self):
         print("browse here")
         try:
-            filename = str(filedialog.askopenfilename())
-            print("Filepath:",filename)
-            self.fpath.set(filename)
+            filename, _ = QFileDialog.getOpenFileName(self, "Open File", "", "Wave Files (*.wav)")
+            print("Filepath:", filename)
+            self.fpath.setText(filename)
         except:
-            messagebox.showinfo("Alert", "only wave files supported...")
+            QMessageBox.information(self, "Alert", "only wave files supported...")
+
     def viewemotion(self):
         print("started...")
-        path=self.fpath.get().strip()
+        path=self.fpath.text().strip()
         print(path)
         r = sr.Recognizer()
         with sr.AudioFile(path) as source:
@@ -83,15 +127,19 @@ class main:
                     POS=POS+ss.get(p[2])
                 if NEG > NEU:
                     if NEG > POS:
-                        messagebox.showinfo("Emotion", "Negative Emotion: " + str(NEG))
+                        QMessageBox.information(self, "Emotion", "Negative Emotion: " + str(NEG))
                     else:
-                        messagebox.showinfo("Emotion", "Positive Emotion: " + str(POS))
+                        QMessageBox.information(self, "Emotion", "Positive Emotion: " + str(POS))
                 else:
                     if NEU>POS:
-                        messagebox.showinfo("Emotion", "Neutral Emotion: " + str(NEU))
+                        QMessageBox.information(self, "Emotion", "Neutral Emotion: " + str(NEU))
                     else:
-                        messagebox.showinfo("Emotion", "Positive Emotion: " + str(POS))
+                        QMessageBox.information(self, "Emotion", "Positive Emotion: " + str(POS))
             except:
-                messagebox.showerror("Error", "Sorry, something went wrong. Please try again.")
-cp=Tk()
-w=main(cp)
+                QMessageBox.critical(self, "Error", "Sorry, something went wrong. Please try again.")
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    main = Main()
+    main.show()
+    sys.exit(app.exec_())

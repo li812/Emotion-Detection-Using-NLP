@@ -36,6 +36,12 @@ class Main(QWidget):
         self.duration.move(150, 20)
         self.duration.resize(50, 50)
 
+
+        txt = QLineEdit(self)
+        txt.move(150, 20)
+        txt.resize(50, 50)
+        txt.setText("")
+
         sbmitbtn = QPushButton("RECORD VOICE", self)
         sbmitbtn.move(20, 100)
         sbmitbtn.resize(250, 50)
@@ -96,26 +102,41 @@ class Main(QWidget):
             QMessageBox.information(self, "Alert", "only wave files supported...")
 
     def viewemotion(self):
-            print("Emotion....")
+        print("started...")
+        path=self.fpath.text().strip()
+        print(path)
+        r = sr.Recognizer()
+        with sr.AudioFile(path) as source:
+            audio_text = r.listen(source)
             try:
-                filename = self.fpath.text().strip()
-                if filename:
-                    r = sr.Recognizer()
-                    with sr.AudioFile(filename) as source:
-                        audio_text = r.record(source)
-                        text = r.recognize_google(audio_text)
-                    print("Text:", text)
+                text = r.recognize_google(audio_text)
+                print('Converting audio transcripts into text ...')
+                print(text)
+                paragraph=text
+                lines_list = tokenize.sent_tokenize(paragraph)
+                print(lines_list)
+                NEG=NEU=POS=0
+                for sentence in lines_list:
                     sid = SentimentIntensityAnalyzer()
-                    sentences = tokenize.sent_tokenize(text)
-                    for sentence in sentences:
-                        scores = sid.polarity_scores(sentence)
-                        for key in sorted(scores):
-                            print('{0}: {1}, '.format(key, scores[key]), end='')
-                        print()
+                    ss = sid.polarity_scores(sentence)
+                    k = ss.keys()
+                    p = list(k)
+                    print("Negative:", ss.get(p[0]), ",Neutral:", ss.get(p[1]), ",Positive:", ss.get(p[2]), ",Sent:",  sentence)
+                    NEG=NEG+ss.get(p[0])
+                    NEU=NEU+ss.get(p[1])
+                    POS=POS+ss.get(p[2])
+                if NEG > NEU:
+                    if NEG > POS:
+                        QMessageBox.information(self, "Emotion", "Negative Emotion: " + str(NEG))
+                    else:
+                        QMessageBox.information(self, "Emotion", "Positive Emotion: " + str(POS))
                 else:
-                    QMessageBox.information(self, "Alert", "Please select a voice file to view emotion...")
+                    if NEU>POS:
+                        QMessageBox.information(self, "Emotion", "Neutral Emotion: " + str(NEU))
+                    else:
+                        QMessageBox.information(self, "Emotion", "Positive Emotion: " + str(POS))
             except:
-                QMessageBox.information(self, "Alert", "Error occured while performing operation...")
+                QMessageBox.critical(self, "Error", "Sorry, something went wrong. Please try again.")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
