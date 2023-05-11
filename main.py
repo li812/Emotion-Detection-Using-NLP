@@ -19,12 +19,6 @@ import speech_recognition as sr
 class Main(QWidget):
     def __init__(self):
         super().__init__()
-
-        self.duration = QLineEdit(self)
-        self.fpath = QLineEdit(self)
-        self.lbl_text = QLabel(self)
-
-
         self.initUI()
 
     def initUI(self):
