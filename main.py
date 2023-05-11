@@ -9,6 +9,9 @@ from scipy.io.wavfile import write
 import soundfile
 from PyQt5.QtWidgets import QApplication, QWidget, QLabel, QLineEdit, QPushButton, QFileDialog, QMessageBox
 from PyQt5.QtGui import QFont
+from PyQt5 import QtWidgets, QtCore
+import sounddevice
+import soundfile
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from nltk import tokenize
 import speech_recognition as sr
@@ -33,14 +36,10 @@ class Main(QWidget):
         lbl_2.move(20, 20)
         lbl_2.resize(250, 50)
 
+        self.duration = QLineEdit(self)
         self.duration.move(150, 20)
         self.duration.resize(50, 50)
-
-
-        txt = QLineEdit(self)
-        txt.move(150, 20)
-        txt.resize(50, 50)
-        txt.setText("")
+        self.duration.setText("")
 
         sbmitbtn = QPushButton("RECORD VOICE", self)
         sbmitbtn.move(20, 100)
@@ -52,13 +51,9 @@ class Main(QWidget):
         lbl.move(20, 150)
         lbl.resize(250, 50)
 
-       
-
-    
+        self.fpath = QLineEdit(self)
         self.fpath.move(20, 200)
         self.fpath.resize(250, 50)
-
-
 
         browse = QPushButton("Browse", self)
         browse.move(20, 250)
@@ -78,12 +73,24 @@ class Main(QWidget):
         ext.setFont(large_font)
         ext.clicked.connect(self.close)
 
+
+
+
     def recordvoice(self):
         print("record")
-        tme = int(self.duration.text().strip())
-        print("Time:", tme)
+        duration_value = self.duration.text().strip()
+        if duration_value:
+            tme = int(duration_value)
+        else:
+            # handle the case where the duration field is empty
+            tme = 0 # for example, set the duration to 0 seconds
+
+
+        print("Time:",tme)
         fs = 44100
+        #second = int(input("Enter time duration in seconds: "))
         print("Recording.....n")
+        #record_voice = sounddevice.rec(int(second * fs), samplerate=fs, channels=2)
         record_voice = sounddevice.rec(int(tme * fs), samplerate=fs, channels=2)
         sounddevice.wait()
         write("out.wav", fs, record_voice)
